@@ -1,0 +1,62 @@
+# Python generierte Dateien
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.swp
+
+# Virtuelle Umgebungen
+env/
+venv/
+
+# Django spezifische Dateien
+db.sqlite3
+db.sqlite3-journal
+*.log
+
+# PostgreSQL spezifische Dateien
+*.pgsql
+*.pgpass
+pg_hba.conf
+pg_ident.conf
+postgresql.auto.conf
+
+# Statische Dateien
+staticfiles/
+static/
+
+# Medienordner
+media/
+
+# Umgebungskonfigurationsdateien
+.env
+*.env
+
+# VS Code spezifische Dateien
+.vscode/
+.code-workspace
+
+# IDE/Editor spezifische Dateien
+*.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node.js (falls npm oder Node verwendet wird)
+node_modules/
+
+# Docker
+*.pid
+*.dockerfile
+.env.docker
+
+# MacOS spezifische Dateien
+.DS_Store
+
+# Pipenv/Poetry spezifische Dateien (falls später verwendet)
+Pipfile
+Pipfile.lock
+poetry.lock
+
+# Migrations (optional, falls du sie nicht in Git verfolgen möchtest)
+*/migrations/*.py
+!*/migrations/__init__.py
