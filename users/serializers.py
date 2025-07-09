@@ -1,4 +1,3 @@
-from click import style
 from rest_framework import serializers
 from django.contrib.auth.models import User
 import re
@@ -9,15 +8,28 @@ class SignupSerializer(serializers.ModelSerializer):
         write_only=True,
         min_length=8,
         max_length=60,
-        style={'input_type': 'password'},)
-    email = serializers.EmailField()
+        style={'input_type': 'password'},
+        error_messages={
+            'blank': 'Please enter a password.'
+        }
+    )
+
+    email = serializers.EmailField(
+        required=True,
+        allow_blank=False,
+        error_messages={
+            'blank': 'Please provide an email address.',
+            'required': 'Email is required.',
+            'invalid': 'Please enter a valid email address.',
+        }
+    )
 
     class Meta:
         model = User
         fields = ('email', 'password')
 
     def validate_password(self, value):
-        pattern = '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$'
+        pattern = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$'
         if not re.fullmatch(pattern, value):
             raise serializers.ValidationError(
                 "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character."
