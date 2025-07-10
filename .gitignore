@@ -31,6 +31,7 @@ media/
 # Umgebungskonfigurationsdateien
 .env
 *.env
+!.env.template
 
 # VS Code spezifische Dateien
 .vscode/
