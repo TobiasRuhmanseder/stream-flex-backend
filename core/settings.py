@@ -25,7 +25,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
-SECRET_KEY = 'django-insecure-)cl_28cd694&6pb3$*(0r-dt3ym)h9eo(p3yecw5cgn!0p&g6('
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -33,6 +32,14 @@ DEBUG = True
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost").split(",")
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     "CSRF_TRUSTED_ORIGINS", default="http://localhost:4200").split(",")
+
+# reCAPTCHA Secret Key (empty if not set)
+RECAPTCHA_SECRET_KEY = os.environ.get('RECAPTCHA_SECRET_KEY', '')
+
+# Feature flag: only enabled if explicitly set to True in the environment variables
+RECAPTCHA_ENABLED = os.environ.get(
+    'RECAPTCHA_ENABLED', 'False').lower() in ('true', '1', 'yes')
+
 
 # Application definition
 
