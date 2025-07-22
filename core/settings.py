@@ -19,7 +19,6 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -30,15 +29,24 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost").split(",")
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:4200",
+]
+
+from corsheaders.defaults import default_headers
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'content-type',
+]
+
+
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     "CSRF_TRUSTED_ORIGINS", default="http://localhost:4200").split(",")
 
-# reCAPTCHA Secret Key (empty if not set)
-RECAPTCHA_SECRET_KEY = os.environ.get('RECAPTCHA_SECRET_KEY', '')
-
-# Feature flag: only enabled if explicitly set to True in the environment variables
-RECAPTCHA_ENABLED = os.environ.get(
-    'RECAPTCHA_ENABLED', 'False').lower() in ('true', '1', 'yes')
+# Secret Key aus der reCAPTCHA-Admin-UI (Standard v3)
+# später in die env-Datei!!! Nur für Projektabgabe hier
+DRF_RECAPTCHA_SECRET_KEY = '6Lf3JH4rAAAAAAZ3L9bm40o_GymkQ7net3q4YfpM'
 
 # Application definition
 
@@ -50,6 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_recaptcha',
     'django_rq',
     'users',
 ]
@@ -58,7 +67,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    # 1. global active throttling 
+    # 1. global active throttling
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',  # anonymous requests
         'rest_framework.throttling.UserRateThrottle',  # user requests
@@ -72,6 +81,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

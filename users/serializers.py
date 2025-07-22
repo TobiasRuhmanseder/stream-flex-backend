@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_recaptcha.fields import ReCaptchaV3Field
 from django.contrib.auth.models import User
 import re
 
@@ -13,7 +14,6 @@ class SignupSerializer(serializers.ModelSerializer):
             'blank': 'Please enter a password.'
         }
     )
-
     email = serializers.EmailField(
         required=True,
         allow_blank=False,
@@ -50,3 +50,7 @@ class SignupSerializer(serializers.ModelSerializer):
             password=password
         )
         return user
+    
+class CheckEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    recaptchaToken = ReCaptchaV3Field(action='check_email', required_score=0.5)
