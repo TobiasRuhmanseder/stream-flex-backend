@@ -23,10 +23,11 @@ class SignupSerializer(serializers.ModelSerializer):
             'invalid': 'Please enter a valid email address.',
         }
     )
+    recaptchaToken = ReCaptchaV3Field(action='signup', required_score=0.5)
 
     class Meta:
         model = User
-        fields = ('email', 'password')
+        fields = ('email', 'password', 'recaptchaToken')
 
     def validate_password(self, value):
         pattern = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$'
@@ -50,7 +51,7 @@ class SignupSerializer(serializers.ModelSerializer):
             password=password
         )
         return user
-    
+
 class CheckEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
     recaptchaToken = ReCaptchaV3Field(action='check_email', required_score=0.5)
