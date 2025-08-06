@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from drf_recaptcha.fields import ReCaptchaV3Field
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 import re
+
+User = get_user_model()
 
 
 class SignupSerializer(serializers.ModelSerializer):
@@ -33,7 +35,7 @@ class SignupSerializer(serializers.ModelSerializer):
         pattern = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$'
         if not re.fullmatch(pattern, value):
             raise serializers.ValidationError(
-                "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character."
+                'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.'
             )
         return value
 
@@ -46,11 +48,13 @@ class SignupSerializer(serializers.ModelSerializer):
         email = validated_data['email']
         password = validated_data['password']
         user = User.objects.create_user(
-            username=validated_data['email'],
+            username=email,
             email=email,
-            password=password
+            password=password,
+            is_active=False
         )
         return user
+
 
 class CheckEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()

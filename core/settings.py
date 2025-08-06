@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+from corsheaders.defaults import default_headers
 from pathlib import Path
 import os
 from dotenv import load_dotenv
@@ -35,7 +36,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
 ]
 
-from corsheaders.defaults import default_headers
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'content-type',
 ]
@@ -48,8 +48,22 @@ CSRF_TRUSTED_ORIGINS = os.environ.get(
 # später in die env-Datei!!! Nur für Projektabgabe hier
 DRF_RECAPTCHA_SECRET_KEY = '6Lf3JH4rAAAAAAZ3L9bm40o_GymkQ7net3q4YfpM'
 
-# Application definition
 
+# später Verlagern in env!!!!!!!!!!!!!!!!!!!
+FRONTEND_URL = 'http://localhost:4200'
+
+# E-Mail configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST         = os.environ.get('EMAIL_HOST')
+EMAIL_PORT         = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_HOST_USER    = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD= os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS      = os.environ.get('EMAIL_USE_TLS', 'False').lower() in ('true', '1', 'yes')
+EMAIL_USE_SSL      = os.environ.get('EMAIL_USE_SSL', 'False').lower() in ('true', '1', 'yes')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
+
+
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -60,7 +74,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_recaptcha',
     'django_rq',
-    'users',
+    'users.apps.UsersConfig',
 ]
 
 REST_FRAMEWORK = {
@@ -162,6 +176,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+#custom user
+AUTH_USER_MODEL = 'users.User'
 
 
 # Internationalization
