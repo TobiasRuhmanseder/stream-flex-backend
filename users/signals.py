@@ -12,7 +12,7 @@ def send_verification_email(sender, instance: User, created, **kwargs):
         return
 
     instance.generate_email_verification_token()
-    verify_url = f'{settings.FRONTEND_URL}/users/verify-email?token={instance.email_verification_token}'
+    verify_url = f'{settings.FRONTEND_URL}/home/sign-in/verify-email?token={instance.email_verification_token}'
     context = {
         'user': instance,
         'verify_url': verify_url,

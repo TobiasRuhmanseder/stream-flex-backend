@@ -2,6 +2,8 @@ from rest_framework import serializers
 from drf_recaptcha.fields import ReCaptchaV3Field
 from django.contrib.auth import get_user_model
 import re
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from exeptions import AccountNotActivated
 
 User = get_user_model()
 
@@ -59,3 +61,10 @@ class SignupSerializer(serializers.ModelSerializer):
 class CheckEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
     recaptchaToken = ReCaptchaV3Field(action='check_email', required_score=0.5)
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        if not self.user.is_active:
+            raise AccountNotActivated()
+        return data

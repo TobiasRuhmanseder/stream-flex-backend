@@ -14,6 +14,8 @@ from corsheaders.defaults import default_headers
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from datetime import timedelta
+
 
 load_dotenv()
 
@@ -40,7 +42,6 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     'content-type',
 ]
 
-
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     "CSRF_TRUSTED_ORIGINS", default="http://localhost:4200").split(",")
 
@@ -54,12 +55,14 @@ FRONTEND_URL = 'http://localhost:4200'
 
 # E-Mail configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST         = os.environ.get('EMAIL_HOST')
-EMAIL_PORT         = int(os.environ.get('EMAIL_PORT', 587))
-EMAIL_HOST_USER    = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD= os.environ.get('EMAIL_HOST_PASSWORD')
-EMAIL_USE_TLS      = os.environ.get('EMAIL_USE_TLS', 'False').lower() in ('true', '1', 'yes')
-EMAIL_USE_SSL      = os.environ.get('EMAIL_USE_SSL', 'False').lower() in ('true', '1', 'yes')
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = os.environ.get(
+    'EMAIL_USE_TLS', 'False').lower() in ('true', '1', 'yes')
+EMAIL_USE_SSL = os.environ.get(
+    'EMAIL_USE_SSL', 'False').lower() in ('true', '1', 'yes')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
 
 
@@ -72,6 +75,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
+    'corsheaders',
     'drf_recaptcha',
     'django_rq',
     'users.apps.UsersConfig',
@@ -79,6 +84,7 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     # 1. global active throttling
@@ -97,6 +103,7 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -176,8 +183,17 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-#custom user
+# custom user
 AUTH_USER_MODEL = 'users.User'
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),   # Standard 5 Minuten
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),     # Standard 1 Tag
+    'ROTATE_REFRESH_TOKENS': False,                  # Refresh-Rotation aus
+    'BLACKLIST_AFTER_ROTATION': False,               # keine Blacklist
+    # …
+}
 
 
 # Internationalization
