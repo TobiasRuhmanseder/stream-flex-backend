@@ -12,3 +12,5 @@ class User(AbstractUser):
         self.email_verification_token = uuid.uuid4().hex
         self.email_token_created = timezone.now()
         self.save(update_fields=['email_verification_token', 'email_token_created'])
+
+

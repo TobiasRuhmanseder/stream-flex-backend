@@ -1,5 +1,5 @@
 from rest_framework import generics
-from .serializers import CheckEmailSerializer, SignupSerializer
+from .serializers import CheckEmailSerializer, CustomTokenObtainPairSerializer, SignupSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.response import Response
@@ -8,7 +8,6 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
@@ -50,25 +49,21 @@ class VerifyEmailView(APIView):
         return Response({'detail': 'Email verified successfully'}, status=status.HTTP_200_OK)
 
 
-class CookieTokenObtainPairView(TokenObtainPairView):
-    # actually inherits from the parent class TokenRefreshView - For learning support only
+class LoginView(TokenObtainPairView):
     permission_classes = [AllowAny]
+    throttle_classes = [AnonRateThrottle]
+    serializer_class = CustomTokenObtainPairSerializer
 
     def finalize_response(self, request, response, *args, **kwargs):
-        # read out the token of the Response-Body
         data = response.data
         refresh = data.get('refresh')
         access = data.get('access')
-        # set cookies
+
         if refresh:
-            response.set_cookie('refresh_token', refresh, httponly=True,
-                                secure=True, samesite='Lax', max_age=7*24*3600)
+            response.set_cookie('refresh_token', refresh, httponly=True, secure=True, samesite='Lax', max_age=7*24*3600)
             del response.data['refresh']
         if access:
-            response.set_cookie(
-                'access_token', access,
-                httponly=True, secure=True, samesite='Lax', max_age=5*60
-            )
+            response.set_cookie('access_token', access,httponly=True, secure=True, samesite='Lax', max_age=5*60)
             del response.data['access']
 
         return super().finalize_response(request, response, *args, **kwargs)
@@ -77,6 +72,7 @@ class CookieTokenObtainPairView(TokenObtainPairView):
 class CookieTokenRefreshView(TokenRefreshView):
     # actually inherits from the parent class TokenRefreshView - For learning support only
     permission_classes = [AllowAny]
+    throttle_classes = [AnonRateThrottle]
 
     def finalize_response(self, request, response, *args, **kwargs):
         data = response.data
@@ -92,6 +88,7 @@ class CookieTokenRefreshView(TokenRefreshView):
 
 class CsrfTokenView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [AnonRateThrottle]
 
     def get(self, request, *args, **kwargs):
         return Response({'detail': 'CSRF cookie set'}, status=status.HTTP_200_OK)
