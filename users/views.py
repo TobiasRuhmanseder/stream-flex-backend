@@ -1,5 +1,5 @@
 from rest_framework import generics
-from .serializers import CheckEmailSerializer, CustomTokenObtainPairSerializer, SignupSerializer
+from .serializers import CheckEmailSerializer, CustomTokenObtainPairSerializer, SignupSerializer, UserSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.response import Response
@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework.permissions import IsAuthenticated
 
 User = get_user_model()
 
@@ -58,14 +59,21 @@ class LoginView(TokenObtainPairView):
         data = response.data
         refresh = data.get('refresh')
         access = data.get('access')
+        remember = data.get('remember')
+        common = dict(httponly=True, secure=True, samesite='Lax')
 
         if refresh:
-            response.set_cookie('refresh_token', refresh, httponly=True, secure=True, samesite='Lax', max_age=7*24*3600)
+            if remember:
+                response.set_cookie('refresh_token', refresh,
+                                    max_age=7*24*3600, **common)
+            else:
+                response.set_cookie('refresh_token', refresh,
+                                    **common)  # session cookie
             del response.data['refresh']
-        if access:
-            response.set_cookie('access_token', access,httponly=True, secure=True, samesite='Lax', max_age=5*60)
-            del response.data['access']
 
+        if access:
+            response.set_cookie('access_token', access, max_age=5*60, **common)
+            del response.data['access']
         return super().finalize_response(request, response, *args, **kwargs)
 
 
@@ -92,3 +100,14 @@ class CsrfTokenView(APIView):
 
     def get(self, request, *args, **kwargs):
         return Response({'detail': 'CSRF cookie set'}, status=status.HTTP_200_OK)
+
+
+class CurrentUserView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [AnonRateThrottle]
+
+    def get(self, request):
+        if request.user and request.user.is_authenticated:
+            return Response(UserSerializer(request.user).data, status=200)
+        # nicht eingeloggt → 200 mit null
+        return Response(None, status=200)

@@ -73,9 +73,12 @@ class CheckEmailSerializer(serializers.Serializer):
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    remember = serializers.BooleanField(required=False, default=False)
+
     def validate(self, attrs):
-        identifier = attrs.get(User.USERNAME_FIELD)  # i.d.R. 'username'
+        identifier = attrs.get(User.USERNAME_FIELD)
         password = attrs.get('password')
+        remember = attrs.pop('remember', False)
 
         user = (
             User.objects.filter(
@@ -97,7 +100,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             "refresh": str(refresh),
             "access": str(refresh.access_token),
             "user": UserSerializer(user).data,
+            "remember": remember,
         }
-
         self.user = user
         return data
