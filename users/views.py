@@ -8,10 +8,9 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 User = get_user_model()
-
 
 class SignupView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -50,7 +49,7 @@ class VerifyEmailView(APIView):
         return Response({'detail': 'Email verified successfully'}, status=status.HTTP_200_OK)
 
 
-class LoginView(TokenObtainPairView):
+class SignInView(TokenObtainPairView):
     permission_classes = [AllowAny]
     throttle_classes = [AnonRateThrottle]
     serializer_class = CustomTokenObtainPairSerializer
@@ -59,7 +58,7 @@ class LoginView(TokenObtainPairView):
         data = response.data
         refresh = data.get('refresh')
         access = data.get('access')
-        remember = data.get('remember')
+        remember = bool(data.pop('remember', False))
         common = dict(httponly=True, secure=True, samesite='Lax')
 
         if refresh:
@@ -69,13 +68,30 @@ class LoginView(TokenObtainPairView):
             else:
                 response.set_cookie('refresh_token', refresh,
                                     **common)  # session cookie
-            del response.data['refresh']
+            del data['refresh']
 
         if access:
             response.set_cookie('access_token', access, max_age=5*60, **common)
-            del response.data['access']
+            del data['access']
         return super().finalize_response(request, response, *args, **kwargs)
 
+
+class SignOutView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [AnonRateThrottle]
+
+    def post(self, request):
+        refresh_token = request.COOKIES.get('refresh_token')
+        if refresh_token:
+            try:
+                RefreshToken(refresh_token).blacklist()
+            except TokenError:
+                pass
+
+        resp = Response({'detail': 'logged out'})
+        resp.delete_cookie('access_token', path='/', samesite='Lax')
+        resp.delete_cookie('refresh_token', path='/', samesite='Lax')
+        return resp
 
 class CookieTokenRefreshView(TokenRefreshView):
     # actually inherits from the parent class TokenRefreshView - For learning support only
@@ -109,5 +125,4 @@ class CurrentUserView(APIView):
     def get(self, request):
         if request.user and request.user.is_authenticated:
             return Response(UserSerializer(request.user).data, status=200)
-        # nicht eingeloggt → 200 mit null
         return Response(None, status=200)
