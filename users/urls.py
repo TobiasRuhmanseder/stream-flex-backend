@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CheckEmailView, CurrentUserView, CookieTokenRefreshView, CsrfTokenView, SignInView, SignOutView, SignupView, VerifyEmailView
+from .views import CheckEmailView, CurrentUserView, CookieTokenRefreshView, CsrfTokenView, ResendVerificationEmailView, SignInView, SignOutView, SignupView, VerifyEmailView
 
 urlpatterns = [
     path('signup/', SignupView.as_view(), name='signup'),
@@ -10,4 +10,5 @@ urlpatterns = [
     path('me/', CurrentUserView.as_view(), name='current_user'),
     path('token-refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
     path('csrf/', CsrfTokenView.as_view(), name='csrf_token'),
+    path('resend-verification/', ResendVerificationEmailView.as_view(), name='resend-verification')
 ]

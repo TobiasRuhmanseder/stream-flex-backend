@@ -11,6 +11,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError as JWTTokenError
 from django.middleware.csrf import get_token
+from . import functions
 
 User = get_user_model()
 
@@ -50,6 +51,36 @@ class VerifyEmailView(APIView):
         user.save(update_fields=[
             'is_active', 'is_email_verified', 'email_verification_token'])
         return Response({'detail': 'Email verified successfully'}, status=status.HTTP_200_OK)
+
+
+class ResendVerificationEmailView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [AnonRateThrottle]
+
+    def post(self, request, *args, **kwargs):
+        """Resend a new verification email if the account exists and is not verified.
+        Always respond with 200 to avoid user enumeration.
+        Expected JSON body: {"email": "user@example.com"}
+        """
+        email = (request.data.get('email') or '').strip()
+        if not email:
+            return Response({'email': ["This field is required."]}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.filter(email__iexact=email).first()
+        neutral = Response({'detail': 'If the account exists and is not verified, a new verification email has been sent.'}, status=status.HTTP_200_OK)
+
+        if not user or getattr(user, 'is_email_verified', False):
+            return neutral
+
+        # Ensure a fresh token and send using shared helpers
+        try:
+            if hasattr(user, 'generate_email_verification_token'):
+                user.generate_email_verification_token()
+            functions.send_verification_email(user)
+        except Exception:
+            pass
+
+        return neutral
 
 
 class SignInView(TokenObtainPairView):
