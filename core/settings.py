@@ -90,7 +90,7 @@ REST_FRAMEWORK = {
     ],
     # 2. rate-limit per classes
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '5/minute',   # max. 5 requests per minutes per IP/Client
+        'anon': '10/minute',   # max. 5 requests per minutes per IP/Client
         'user': '20/minute',  # max. 20 requests per minutes per logged in user
     }
 

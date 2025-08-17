@@ -1,5 +1,5 @@
 from rest_framework import generics
-from .serializers import CheckEmailSerializer, CustomTokenObtainPairSerializer, SignupSerializer, UserSerializer
+from .serializers import CheckEmailSerializer, CustomTokenObtainPairSerializer, SignupSerializer, UserSerializer, PasswordResetRequestSerializer, PasswordResetConfirmSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.response import Response
@@ -12,6 +12,9 @@ from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError as JWTTokenError
 from django.middleware.csrf import get_token
 from . import functions
+from . functions import send_password_reset_email
+from rest_framework.generics import GenericAPIView
+from .jwt_cookie_auth import CustomAuthentication
 
 User = get_user_model()
 
@@ -134,15 +137,11 @@ class CookieTokenRefreshView(TokenRefreshView):
     throttle_classes = [AnonRateThrottle]
 
     def post(self, request, *args, **kwargs):
-        """Allow refresh token via JSON body OR HttpOnly cookie.
-        If the client doesn't send a body, we fall back to the 'refresh_token' cookie.
-        """
         refresh_token = request.COOKIES.get('refresh_token')
         serializer = self.get_serializer(data={'refresh': refresh_token})
         try:
             serializer.is_valid(raise_exception=True)
         except JWTTokenError as e:
-            # Match SimpleJWT behaviour
             raise InvalidToken(e.args[0])
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
@@ -163,16 +162,50 @@ class CsrfTokenView(APIView):
     throttle_classes = [AnonRateThrottle]
 
     def get(self, request, *args, **kwargs):
-        # Force Django to generate/set the CSRF cookie via CsrfViewMiddleware
         token = get_token(request)
         return Response({'detail': 'CSRF cookie set', 'csrftoken': token}, status=status.HTTP_200_OK)
 
 
 class CurrentUserView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = [CustomAuthentication]
+    permission_classes = [IsAuthenticated]
     throttle_classes = [AnonRateThrottle]
 
     def get(self, request):
-        if request.user and request.user.is_authenticated:
-            return Response(UserSerializer(request.user).data, status=200)
-        return Response(None, status=200)
+        return Response(UserSerializer(request.user).data, status=status.HTTP_200_OK)
+    
+
+class PasswordResetRequestView(GenericAPIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [AnonRateThrottle]
+    serializer_class = PasswordResetRequestSerializer
+
+    def post(self, request, *args, **kwargs):
+        ser = self.get_serializer(data=request.data)
+        if not ser.is_valid():
+            return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        email = ser.validated_data['email']
+        user = User.objects.filter(email__iexact=email).first()
+        detail = {'detail': 'If the account exists, a reset email has been sent.'}
+        if user and getattr(user, 'is_active', True):
+            try:
+                send_password_reset_email(user)
+            except Exception:
+                pass
+        return Response(detail, status=status.HTTP_200_OK)
+
+class PasswordResetConfirmView(GenericAPIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [AnonRateThrottle]
+    serializer_class = PasswordResetConfirmSerializer
+
+    def post(self, request, *args, **kwargs):
+        ser = self.get_serializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+
+        user = ser.validated_data['user']
+        new_password = ser.validated_data['new_password']
+        user.set_password(new_password)
+        user.save(update_fields=['password'])
+        return Response({'detail': 'Password has been changed.'}, status=status.HTTP_200_OK)
