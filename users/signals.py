@@ -3,6 +3,7 @@ from django.dispatch import receiver
 from .models import User
 from . import functions
 
+
 @receiver(post_save, sender=User)
 def send_verification_email_signal(sender, instance: User, created, **kwargs):
     """On user creation, ensure a fresh token and send the verification email.

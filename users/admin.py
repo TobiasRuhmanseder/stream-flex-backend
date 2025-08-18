@@ -4,7 +4,6 @@ from .models import User
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 
 
-
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     model = User
@@ -13,14 +12,16 @@ class CustomUserAdmin(UserAdmin):
     ordering = ("email",)
     search_fields = ("email",)
     fieldsets = (
-        (None,               {"fields": ("email", "password")}),
-        ("Permissions",      {"fields": ("is_staff",
-        "is_active", "groups", "user_permissions")}),
-        ("Important dates",  {"fields": ("last_login", "date_joined")}),
+        (None, {"fields": ("email", "password")}),
+        ("Permissions", {"fields": ("is_staff", "is_active", "groups", "user_permissions")}),
+        ("Important dates", {"fields": ("last_login", "date_joined")}),
     )
     add_fieldsets = (
-        (None, {
-            "classes": ("wide",),
-            "fields": ("email", "password1", "password2", "is_staff", "is_active"),
-        }),
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email", "password1", "password2", "is_staff", "is_active"),
+            },
+        ),
     )

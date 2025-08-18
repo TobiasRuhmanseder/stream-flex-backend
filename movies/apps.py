@@ -1,9 +1,8 @@
 from django.apps import AppConfig
 
 
-class UsersConfig(AppConfig):
+class MoviesConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "users"
-
+    name = "movies"
     def ready(self):
-        import users.signals
+        from . import signals

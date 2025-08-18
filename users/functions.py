@@ -20,7 +20,7 @@ def ensure_email_verification_token(user):
     """Ensure the user has a verification token and return it.
     Generates and persists a new token if missing.
     """
-    if not getattr(user, 'email_verification_token', None):
+    if not getattr(user, "email_verification_token", None):
         user.generate_email_verification_token()
     return user.email_verification_token
 
@@ -28,17 +28,17 @@ def ensure_email_verification_token(user):
 def build_verify_url(user):
     """Build the frontend verification URL including token (+ email for prefill)."""
     token = ensure_email_verification_token(user)
-    query = urlencode({'token': token, 'email': user.email})
+    query = urlencode({"token": token, "email": user.email})
     return f"{settings.FRONTEND_URL}/home/verify-email?{query}"
 
 
 def render_verification_bodies(user, verify_url):
     """Return (subject, text_body, html_body) for the verification email."""
-    context = {'user': user, 'verify_url': verify_url}
-    subject = 'Please confirm your email at Streamflex'
+    context = {"user": user, "verify_url": verify_url}
+    subject = "Please confirm your email at Streamflex"
 
-    text_body = render_to_string('emails/verification_email.txt', context)
-    html_body = render_to_string('emails/verification_email.html', context)
+    text_body = render_to_string("emails/verification_email.txt", context)
+    html_body = render_to_string("emails/verification_email.html", context)
 
     if not text_body or not text_body.strip():
         text_body = strip_tags(html_body)
@@ -48,30 +48,29 @@ def render_verification_bodies(user, verify_url):
 def send_verification_email(user):
     """Send the verification email to the user (multipart plain+HTML)."""
     verify_url = build_verify_url(user)
-    subject, text_body, html_body = render_verification_bodies(
-        user, verify_url)
+    subject, text_body, html_body = render_verification_bodies(user, verify_url)
     msg = EmailMultiAlternatives(
         subject=subject,
         body=text_body,
-        from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', None),
+        from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
         to=[user.email],
     )
-    msg.attach_alternative(html_body, 'text/html')
+    msg.attach_alternative(html_body, "text/html")
     msg.send()
 
 
 def build_password_reset_url(user):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = PasswordResetTokenGenerator().make_token(user)
-    query = urlencode({'uid': uid, 'token': token, 'email': user.email})
+    query = urlencode({"uid": uid, "token": token, "email": user.email})
     return f"{settings.FRONTEND_URL}/home/password-reset?{query}"
 
 
 def render_password_reset_bodies(user, reset_url):
-    ctx = {'user': user, 'reset_url': reset_url}
-    subject = 'Reset your password at Streamflex'
-    text_body = render_to_string('emails/password_reset.txt', ctx)
-    html_body = render_to_string('emails/password_reset.html', ctx)
+    ctx = {"user": user, "reset_url": reset_url}
+    subject = "Reset your password at Streamflex"
+    text_body = render_to_string("emails/password_reset.txt", ctx)
+    html_body = render_to_string("emails/password_reset.html", ctx)
     if not text_body or not text_body.strip():
         text_body = strip_tags(html_body)
     return subject, text_body, html_body
@@ -83,8 +82,8 @@ def send_password_reset_email(user):
     msg = EmailMultiAlternatives(
         subject=subject,
         body=text_body,
-        from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', None),
+        from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
         to=[user.email],
     )
-    msg.attach_alternative(html_body, 'text/html')
+    msg.attach_alternative(html_body, "text/html")
     msg.send()
