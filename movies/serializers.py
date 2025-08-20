@@ -31,6 +31,6 @@ class MovieSerializer(serializers.ModelSerializer):
             "duration_seconds",
             "processing_status",
             "is_hero",
-            "genre_ids",
+            "genres",
             "created_at",
         )
