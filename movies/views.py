@@ -54,7 +54,7 @@ class GenreListView(generics.ListAPIView):
     queryset = Genre.objects.all().order_by("name")
 
 
-class GenreMoviesView(APIView):
+class GenreMoviesView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = MovieSerializer
 

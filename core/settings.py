@@ -86,8 +86,8 @@ REST_FRAMEWORK = {
     ],
     # 2. rate-limit per classes
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "10/minute",  # max. 5 requests per minutes per IP/Client
-        "user": "20/minute",  # max. 20 requests per minutes per logged in user
+        "anon": "30/minute",  # max. 20 requests per minutes per IP/Client
+        "user": "50/minute",  # max. 50 requests per minutes per logged in user
     },
 }
 
@@ -101,6 +101,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "users.middleware.cleanup_expired_refresh_cookie.CleanupExpiredRefreshCookie",
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -180,6 +181,12 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),  # Standard 1 Tag
     "ROTATE_REFRESH_TOKENS": False,  # Refresh-Rotation aus
     "BLACKLIST_AFTER_ROTATION": False,  # keine Blacklist
+    "AUTH_COOKIE": "access_token",          # Name des Access-Cookies
+    "AUTH_REFRESH_COOKIE": "refresh_token",
+    "AUTH_COOKIE_SECURE": False,            # in PROD True (HTTPS)
+    "AUTH_COOKIE_SAMESITE": "Lax",
+    "AUTH_COOKIE_PATH": "/",
+    "AUTH_COOKIE_DOMAIN": None,
     # …
 }
 
