@@ -82,7 +82,7 @@ REST_FRAMEWORK = {
     # 1. global active throttling
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",  # anonymous requests
-        "rest_framework.throttling.UserRateThrottle",  # user requests
+        # "rest_framework.throttling.UserRateThrottle",  # user requests
     ],
     # 2. rate-limit per classes
     "DEFAULT_THROTTLE_RATES": {

@@ -37,7 +37,7 @@ def pick_random(qs, limit):
 
 
 def choose_quality(has_1080, has_720, has_480, screen_h=None, downlink_mbps=None):
-
+    # Determine the maximum sensible level based on screen height
     if screen_h is None:
         max_level = "720"
     else:
@@ -61,7 +61,12 @@ def choose_quality(has_1080, has_720, has_480, screen_h=None, downlink_mbps=None
     else:
         candidates = ["480"]
 
+    # Pick a quality (q) using the exact same selection logic as before,
+    # but always return a unified i18n key: player.quality.{q}
+    q = None
+
     if downlink_mbps is not None:
+        # speed-aware choice
         want = None
         if downlink_mbps >= 7 and "1080" in candidates:
             want = "1080"
@@ -71,28 +76,36 @@ def choose_quality(has_1080, has_720, has_480, screen_h=None, downlink_mbps=None
             want = "480" if "480" in candidates else None
 
         if want and available.get(want):
-            return want, "video.autoBySpeedAndResolution"
+            q = want
+        else:
+            # first available in candidates
+            for opt in candidates:
+                if available.get(opt):
+                    q = opt
+                    break
+            # broad fallback order
+            if q is None:
+                for opt in ["720", "480", "1080"]:
+                    if available.get(opt):
+                        q = opt
+                        break
+    else:
+        # resolution-only choice
+        for opt in candidates:
+            if available.get(opt):
+                q = opt
+                break
+        if q is None:
+            for opt in ["720", "480", "1080"]:
+                if available.get(opt):
+                    q = opt
+                    break
 
-        for q in candidates:
-            if available.get(q):
-                return q, "video.autoBySpeedAndResolution"
+    if q is None:
+        q = "480"
 
-        for q in ["720", "480", "1080"]:
-            if available.get(q):
-                return q, "video.autoBySpeedAndResolution"
-
-        return "480", "video.autoBySpeedAndResolution"
-
-    for q in candidates:
-        if available.get(q):
-            return q, "video.autoByResolution"
-
-    # fallback
-    for q in ["720", "480", "1080"]:
-        if available.get(q):
-            return q, "video.autoByResolution"
-
-    return "480", "video.autoByResolution"
+    msg_key = f"player.quality.{q}"
+    return q, msg_key
 
 
 

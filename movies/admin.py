@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.db.models import Count
-from .models import Genre, Movie
+from .models import Favorite, Genre, Movie
 
 
 @admin.register(Movie)
@@ -31,3 +31,9 @@ class GenreAdmin(admin.ModelAdmin):
     @admin.display(description="Movies")
     def movie_count(self, obj):
         return getattr(obj, "_movie_count", 0)
+    
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ('user', 'movie', 'created_at')
+    list_filter  = ('created_at',)
+    search_fields = ('user__email', 'movie__title')

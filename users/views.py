@@ -104,7 +104,7 @@ class SignInView(TokenObtainPairView):
         refresh = response.data.get("refresh")
         access = response.data.get("access")
         remember = bool(response.data.pop("remember", False))
-        common = dict(httponly=True, secure=False, samesite="Lax")
+        common = dict(httponly=True, secure=True, samesite="Lax")
 
         if refresh:
             if remember:
