@@ -29,6 +29,6 @@ urlpatterns = [
     path("<int:pk>/thumbnail/", ThumbnailView.as_view(), name="thumbnail"),
     path("<int:pk>/logo/", LogoView.as_view(), name="logo"),
     path("<int:pk>/hero-image/", HeroImageView.as_view(), name="hero-image"),
-    path("api/movies/<int:pk>/favorite/", FavoriteView.as_view(), name="favorite"),
-    path("api/movies/favorites/", FavoriteListView.as_view(), name="favorites"),
+    path("<int:pk>/favorite/", FavoriteView.as_view(), name="favorite"),
+    path("favorites/", FavoriteListView.as_view(), name="favorites"),
 ]
