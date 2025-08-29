@@ -7,6 +7,7 @@ from .file_utils import delete_many_file_fields
 
 @receiver(post_save, sender=Movie)
 def enqueue_transcode(sender, instance, created, **kwargs):
+    """Start video transcoding job when a new movie is created or missing transcoded files."""
     if not instance.video_file:
         return
     if created or not (instance.video_1080 and instance.video_720 and instance.video_480):
@@ -18,6 +19,7 @@ def enqueue_transcode(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=Movie)
 def delete_files_on_movie_delete(sender, instance: Movie, **kwargs):
+    """Remove all associated video and image files when a movie is deleted."""
     delete_many_file_fields(
         instance,
         [

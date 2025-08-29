@@ -14,6 +14,7 @@ from .serializers import MovieSerializer, GenreSerializer
 
 
 class MovieListCreateView(APIView):
+    """Return a list of movies. User must be logged in."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -27,6 +28,7 @@ class MovieListCreateView(APIView):
 
 
 class MovieDetailView(APIView):
+    """Return detail of a single movie. User must be logged in."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk: int):
@@ -36,6 +38,7 @@ class MovieDetailView(APIView):
 
 
 class SearchMoviesView(generics.ListAPIView):
+    """Search movies by title or description. User must be logged in."""
     permission_classes = [IsAuthenticated]
     serializer_class = MovieSerializer
 
@@ -54,6 +57,7 @@ class SearchMoviesView(generics.ListAPIView):
 
 
 class HeroListView(APIView):
+    """Return a list of hero movies. User must be logged in."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -70,12 +74,14 @@ class HeroListView(APIView):
 
 
 class GenreListView(generics.ListAPIView):
+    """Return a list of all genres. Anyone can access."""
     permission_classes = [AllowAny]
     serializer_class = GenreSerializer
     queryset = Genre.objects.all().order_by("name")
 
 
 class GenreMoviesView(generics.ListAPIView):
+    """Return movies for a specific genre. User must be logged in."""
     permission_classes = [IsAuthenticated]
     serializer_class = MovieSerializer
 
@@ -91,6 +97,7 @@ class GenreMoviesView(generics.ListAPIView):
 
 
 class ResolveSpeedView(APIView):
+    """Determine best video quality based on speed and screen height. User must be logged in."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
@@ -123,6 +130,7 @@ class ResolveSpeedView(APIView):
 
 
 class VideoStreamView(APIView):
+    """Stream video file for a movie. User must be logged in."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
@@ -136,6 +144,7 @@ class VideoStreamView(APIView):
 
 
 class TeaserStreamView(APIView):
+    """Stream teaser video for a movie. User must be logged in."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
@@ -147,6 +156,7 @@ class TeaserStreamView(APIView):
 
 
 class ThumbnailView(APIView):
+    """Serve thumbnail image for a movie. User must be logged in."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
@@ -159,6 +169,7 @@ class ThumbnailView(APIView):
 
 
 class LogoView(APIView):
+    """Serve logo image for a movie. User must be logged in."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
@@ -171,6 +182,7 @@ class LogoView(APIView):
 
 
 class HeroImageView(APIView):
+    """Serve hero image for a movie. User must be logged in."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk: int):
@@ -183,6 +195,7 @@ class HeroImageView(APIView):
 
 
 class FavoriteView(APIView):
+    """Add or remove a movie from user's favorites. User must be logged in."""
     permission_classes = [IsAuthenticated]
 
     # POST /api/movies/<pk>/favorite/  → add (idempotent)
@@ -198,6 +211,7 @@ class FavoriteView(APIView):
 
 
 class FavoriteListView(APIView):
+    """Return list of user's favorite movies. User must be logged in."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

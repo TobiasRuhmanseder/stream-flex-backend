@@ -41,6 +41,7 @@ COOKIE_SETTINGS = {
 
 
 class SignupView(generics.CreateAPIView):
+    """API endpoint for user signup (registration)."""
     queryset = User.objects.all()
     throttle_classes = [AnonRateThrottle]
     permission_classes = [AllowAny]
@@ -48,6 +49,7 @@ class SignupView(generics.CreateAPIView):
 
 
 class CheckEmailView(generics.GenericAPIView):
+    """API endpoint to check if an email is already registered."""
     permission_classes = [AllowAny]
     throttle_classes = [AnonRateThrottle]
     serializer_class = CheckEmailSerializer
@@ -63,6 +65,7 @@ class CheckEmailView(generics.GenericAPIView):
 
 
 class VerifyEmailView(APIView):
+    """API endpoint to verify a user's email address using a token."""
     permission_classes = [AllowAny]
     throttle_classes = [AnonRateThrottle]
 
@@ -77,6 +80,7 @@ class VerifyEmailView(APIView):
 
 
 class ResendVerificationEmailView(APIView):
+    """API endpoint to resend a verification email if the account is not yet verified."""
     permission_classes = [AllowAny]
     throttle_classes = [AnonRateThrottle]
 
@@ -105,6 +109,7 @@ class ResendVerificationEmailView(APIView):
 
 
 class SignInView(TokenObtainPairView):
+    """API endpoint for user login that issues JWT tokens in cookies."""
     permission_classes = [AllowAny]
     throttle_classes = [AnonRateThrottle]
     serializer_class = CustomTokenObtainPairSerializer
@@ -134,6 +139,7 @@ class SignInView(TokenObtainPairView):
 
 
 class SignOutView(APIView):
+    """API endpoint to log out a user and delete authentication cookies."""
     permission_classes = []
     throttle_classes = [AnonRateThrottle]
 
@@ -158,6 +164,7 @@ class SignOutView(APIView):
 
 
 class CookieTokenRefreshView(TokenRefreshView):
+    """API endpoint to refresh access tokens using the refresh cookie."""
     permission_classes = [AllowAny]
     throttle_classes = [AnonRateThrottle]
 
@@ -190,6 +197,7 @@ class CookieTokenRefreshView(TokenRefreshView):
 
 
 class CsrfTokenView(APIView):
+    """API endpoint to get a CSRF token cookie for frontend use."""
     permission_classes = [AllowAny]
     throttle_classes = [AnonRateThrottle]
 
@@ -199,6 +207,7 @@ class CsrfTokenView(APIView):
 
 
 class CurrentUserView(APIView):
+    """API endpoint to get details of the currently authenticated user."""
     authentication_classes = [CustomAuthentication]
     permission_classes = [IsAuthenticated]
     throttle_classes = [AnonRateThrottle]
@@ -208,6 +217,7 @@ class CurrentUserView(APIView):
 
 
 class PasswordResetRequestView(GenericAPIView):
+    """API endpoint to request a password reset email."""
     permission_classes = [AllowAny]
     throttle_classes = [AnonRateThrottle]
     serializer_class = PasswordResetRequestSerializer
@@ -229,6 +239,7 @@ class PasswordResetRequestView(GenericAPIView):
 
 
 class PasswordResetConfirmView(GenericAPIView):
+    """API endpoint to confirm password reset and set a new password."""
     permission_classes = [AllowAny]
     throttle_classes = [AnonRateThrottle]
     serializer_class = PasswordResetConfirmSerializer

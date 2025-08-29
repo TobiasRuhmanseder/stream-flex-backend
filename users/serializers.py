@@ -16,6 +16,7 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """Serializer for basic user information (id and username)."""
     class Meta:
         model = User
         fields = ("id", "username")
@@ -23,6 +24,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class SignupSerializer(serializers.ModelSerializer):
+    """Serializer for new user signup with email, password, and reCAPTCHA validation."""
+
     password = serializers.CharField(
         write_only=True,
         min_length=8,
@@ -53,11 +56,13 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
 class CheckEmailSerializer(serializers.Serializer):
+    """Serializer to check if an email already exists, with reCAPTCHA validation."""
     email = serializers.EmailField()
     recaptchaToken = ReCaptchaV3Field(action="check_email", required_score=0.5)
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """Custom login serializer that adds 'remember me' and reCAPTCHA to JWT authentication."""
     remember = serializers.BooleanField(required=False, default=False)
     recaptchaToken = ReCaptchaV3Field(action="signin", required_score=0.5)
 
@@ -92,11 +97,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class PasswordResetRequestSerializer(serializers.Serializer):
+    """Serializer for requesting a password reset with email and reCAPTCHA."""
     email = serializers.EmailField(required=True)
     recaptchaToken = ReCaptchaV3Field(action="resetpasswordrequest", required_score=0.5)
 
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Serializer to confirm password reset using uid, token, and a new password."""
     uid = serializers.CharField()
     token = serializers.CharField()
     new_password = serializers.CharField(

@@ -1,8 +1,13 @@
 from django.http import Http404
-import random #needed for the tests
+import random  # needed for the tests
 
 
 def parse_limit(request, default=3, min_value=1, max_value=10):
+    """
+    Read ?limit from request.query_params and return a safe integer.
+    Clamps the value between min_value and max_value and falls back to
+    the provided default on missing/invalid input.
+    """
     raw = request.query_params.get("limit")
     try:
         value = int(raw) if raw is not None else default
@@ -16,6 +21,11 @@ def parse_limit(request, default=3, min_value=1, max_value=10):
 
 
 def get_random_flag(request, default=False):
+    """
+    Return a boolean for the query param `random`.
+    Accepts common truthy strings (1/true/yes/on) case-insensitively;
+    if the param is missing, returns the given default.
+    """
     val = request.query_params.get("random")
     if val is None:
         return default
@@ -23,21 +33,32 @@ def get_random_flag(request, default=False):
 
 
 def pick_random(qs, limit):
+    """
+    Return up to `limit` objects from a queryset in a stable order.
+    When `limit` is less than the number of rows, sample deterministically via
+    the module-level `random.sample` (so tests can patch movies.funktions.random).
+    The returned objects keep the sampled order.
+    """
     ids = list(qs.values_list("id", flat=True))
     if not ids:
         return []
     if limit >= len(ids):
         selected_ids = ids
     else:
-        import random
-
+        # Use the module-level `random` so tests can patch
         selected_ids = random.sample(ids, k=limit)
     objs = list(qs.model.objects.filter(id__in=selected_ids))
+    # Preserve the selected order
     objs.sort(key=selected_ids.index)
     return objs
 
 
 def choose_quality(has_1080, has_720, has_480, screen_h=None, downlink_mbps=None):
+    """
+    Decide the streaming quality ("1080"/"720"/"480") based on available files,
+    optional screen height, and optional network speed (downlink_mbps).
+    Returns a tuple (quality_str, i18n_key). Always emits key `player.quality.{q}`.
+    """
     # Determine the maximum sensible level based on screen height
     if screen_h is None:
         max_level = "720"
@@ -111,6 +132,10 @@ def choose_quality(has_1080, has_720, has_480, screen_h=None, downlink_mbps=None
 
 
 def getSource(movie, q):
+    """
+    Pick the Movie FileField for the requested quality string.
+    If `q` is empty/unknown, fall back to 720→480→1080.
+    """
     if q == "1080":
         src = movie.video_1080
     elif q == "720":
@@ -123,6 +148,10 @@ def getSource(movie, q):
 
 
 def check_or_404(file_field):
+    """
+    Open a FileField from storage or raise Http404 if the field is empty/missing.
+    Returns a readable file handle.
+    """
     if not file_field or not getattr(file_field, "name", None):
         raise Http404("File not available")
     return file_field.storage.open(file_field.name, "rb")

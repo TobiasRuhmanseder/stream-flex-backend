@@ -4,7 +4,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
 class CleanupExpiredRefreshCookie(MiddlewareMixin):
+    """Delete refresh/access cookies when the refresh JWT is no longer valid.
+    
+    This class only touches cookies; it doesn't try to refresh tokens or modify
+    responses otherwise. Safe to keep early in MIDDLEWARE.
+    """
     def process_response(self, request, response):
+        
         name = settings.SIMPLE_JWT["AUTH_REFRESH_COOKIE"]
         tok = request.COOKIES.get(name)
         if not tok:

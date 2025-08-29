@@ -6,12 +6,14 @@ from .models import Favorite, Genre, Movie
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    """Serializer for Genre model. Returns id, name, and slug."""
     class Meta:
         model = Genre
         fields = ("id", "name", "slug")
 
 
 class MovieSerializer(serializers.ModelSerializer):
+    """Serializer for Movie model. Includes basic fields, file URLs (logo, hero image, thumbnail, teaser, videos), duration, status, and favorite info."""
     logo = serializers.SerializerMethodField()
     hero_image = serializers.SerializerMethodField()
     thumbnail_image = serializers.SerializerMethodField()

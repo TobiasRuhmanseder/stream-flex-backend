@@ -17,23 +17,21 @@ User = get_user_model()
 
 
 def ensure_email_verification_token(user):
-    """Ensure the user has a verification token and return it.
-    Generates and persists a new token if missing.
-    """
+    """Make sure the user has a verification token, create one if not."""
     if not getattr(user, "email_verification_token", None):
         user.generate_email_verification_token()
     return user.email_verification_token
 
 
 def build_verify_url(user):
-    """Build the frontend verification URL including token (+ email for prefill)."""
+    """Create the email verification URL with token and email."""
     token = ensure_email_verification_token(user)
     query = urlencode({"token": token, "email": user.email})
     return f"{settings.FRONTEND_URL}/home/verify-email?{query}"
 
 
 def render_verification_bodies(user, verify_url):
-    """Return (subject, text_body, html_body) for the verification email."""
+    """Create the subject and body texts for the verification email."""
     context = {"user": user, "verify_url": verify_url}
     subject = "Please confirm your email at Streamflex"
 
@@ -46,7 +44,7 @@ def render_verification_bodies(user, verify_url):
 
 
 def send_verification_email(user):
-    """Send the verification email to the user (multipart plain+HTML)."""
+    """Send the verification email with both plain text and HTML parts."""
     verify_url = build_verify_url(user)
     subject, text_body, html_body = render_verification_bodies(user, verify_url)
     msg = EmailMultiAlternatives(
@@ -60,6 +58,7 @@ def send_verification_email(user):
 
 
 def build_password_reset_url(user):
+    """Create the password reset URL with UID and token."""
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = PasswordResetTokenGenerator().make_token(user)
     query = urlencode({"uid": uid, "token": token, "email": user.email})
@@ -67,6 +66,7 @@ def build_password_reset_url(user):
 
 
 def render_password_reset_bodies(user, reset_url):
+    """Create the subject and body texts for the password reset email."""
     ctx = {"user": user, "reset_url": reset_url}
     subject = "Reset your password at Streamflex"
     text_body = render_to_string("emails/password_reset.txt", ctx)
@@ -77,6 +77,7 @@ def render_password_reset_bodies(user, reset_url):
 
 
 def send_password_reset_email(user):
+    """Send the password reset email with plain text and HTML parts."""
     reset_url = build_password_reset_url(user)
     subject, text_body, html_body = render_password_reset_bodies(user, reset_url)
     msg = EmailMultiAlternatives(
