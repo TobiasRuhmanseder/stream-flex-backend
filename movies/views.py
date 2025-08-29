@@ -1,4 +1,3 @@
-from math import log
 import mimetypes
 from django.db.models import Q
 from django.http import FileResponse
@@ -118,12 +117,7 @@ class ResolveSpeedView(APIView):
         url = request.build_absolute_uri(stream_path)
 
         return Response(
-            {
-                "movie_id": movie.pk,
-                "quality": quality,
-                "url": url,
-                "message_key": msg_key,
-            },
+            {"movie_id": movie.pk,"quality": quality,"url": url,"message_key": msg_key,},
             status=status.HTTP_200_OK,
         )
 

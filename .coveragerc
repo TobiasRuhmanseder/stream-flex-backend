@@ -1,0 +1,23 @@
+[run]
+branch = True
+source =
+    users
+    movies
+    core
+omit =
+    */migrations/*
+    */tests/*
+    */conftest.py
+    */manage.py
+    core/wsgi.py
+    core/asgi.py
+    core/tests/*
+    **/settings.py
+    **/test_settings.py
+    */admin.py
+    */apps.py
+
+[report]
+skip_covered = True
+show_missing = True
+fail_under = 80

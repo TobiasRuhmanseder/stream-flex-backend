@@ -22,8 +22,22 @@ from . import functions
 from .functions import send_password_reset_email
 from rest_framework.generics import GenericAPIView
 from .jwt_cookie_auth import CustomAuthentication
+from django.conf import settings
+
 
 User = get_user_model()
+
+COOKIE_SETTINGS = {
+    "access_cookie_name": settings.SIMPLE_JWT.get("AUTH_COOKIE", "access_token"),
+    "refresh_cookie_name": settings.SIMPLE_JWT.get("AUTH_REFRESH_COOKIE", "refresh_token"),
+    "access_max_age": int(settings.SIMPLE_JWT.get("ACCESS_TOKEN_LIFETIME").total_seconds()) if settings.SIMPLE_JWT.get("ACCESS_TOKEN_LIFETIME") else 5 * 60,
+    "refresh_max_age": int(settings.SIMPLE_JWT.get("REFRESH_TOKEN_LIFETIME").total_seconds()) if settings.SIMPLE_JWT.get("REFRESH_TOKEN_LIFETIME") else 24 * 3600,
+    "httponly": True,
+    "secure": settings.SIMPLE_JWT.get("AUTH_COOKIE_SECURE", False),
+    "samesite": settings.SIMPLE_JWT.get("AUTH_COOKIE_SAMESITE", "Lax"),
+    "domain": settings.SIMPLE_JWT.get("AUTH_COOKIE_DOMAIN", None),
+    "path": settings.SIMPLE_JWT.get("AUTH_COOKIE_PATH", "/"),
+}
 
 
 class SignupView(generics.CreateAPIView):
@@ -74,24 +88,19 @@ class ResendVerificationEmailView(APIView):
         email = (request.data.get("email") or "").strip()
         if not email:
             return Response({"email": ["This field is required."]}, status=status.HTTP_400_BAD_REQUEST)
-
         user = User.objects.filter(email__iexact=email).first()
         neutral = Response(
             {"detail": "If the account exists and is not verified, a new verification email has been sent."},
             status=status.HTTP_200_OK,
         )
-
         if not user or getattr(user, "is_email_verified", False):
             return neutral
-
-        # Ensure a fresh token and send using shared helpers
         try:
             if hasattr(user, "generate_email_verification_token"):
                 user.generate_email_verification_token()
             functions.send_verification_email(user)
         except Exception:
             pass
-
         return neutral
 
 
@@ -104,46 +113,57 @@ class SignInView(TokenObtainPairView):
         refresh = response.data.get("refresh")
         access = response.data.get("access")
         remember = bool(response.data.pop("remember", False))
-        common = dict(httponly=True, secure=True, samesite="Lax")
-
+        common = {
+            "httponly": COOKIE_SETTINGS["httponly"],
+            "secure": COOKIE_SETTINGS["secure"],
+            "samesite": COOKIE_SETTINGS["samesite"],
+            "domain": COOKIE_SETTINGS["domain"],
+            "path": COOKIE_SETTINGS["path"],
+        }
         if refresh:
             if remember:
-                response.set_cookie(key="refresh_token", value=refresh, max_age=7 * 24 * 3600, **common)
+                response.set_cookie(key=COOKIE_SETTINGS["refresh_cookie_name"],value=refresh,max_age=COOKIE_SETTINGS["refresh_max_age"],**common,)
             else:
-                response.set_cookie(key="refresh_token", value=refresh, **common)  # session cookie
+                response.set_cookie(key=COOKIE_SETTINGS["refresh_cookie_name"],value=refresh,**common,)  # session cookie
             del response.data["refresh"]
 
         if access:
-            response.set_cookie(key="access_token", value=access, max_age=5 * 60, **common)
+            response.set_cookie(key=COOKIE_SETTINGS["access_cookie_name"],value=access,max_age=COOKIE_SETTINGS["access_max_age"],**common,)
             del response.data["access"]
         return super().finalize_response(request, response, *args, **kwargs)
 
 
 class SignOutView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = []
     throttle_classes = [AnonRateThrottle]
 
     def post(self, request):
-        refresh_token = request.COOKIES.get("refresh_token")
+        refresh_cookie_name = COOKIE_SETTINGS["refresh_cookie_name"]
+        access_cookie_name = COOKIE_SETTINGS["access_cookie_name"]
+        ckw = {
+            "path": COOKIE_SETTINGS["path"],
+            "domain": COOKIE_SETTINGS["domain"],
+            "samesite": COOKIE_SETTINGS["samesite"],
+        }
+        refresh_token = request.COOKIES.get(refresh_cookie_name)
         if refresh_token:
             try:
                 RefreshToken(refresh_token).blacklist()
             except TokenError:
                 pass
-
         resp = Response({"detail": "logged out"})
-        resp.delete_cookie("access_token", path="/", samesite="None")
-        resp.delete_cookie("refresh_token", path="/", samesite="None")
+        resp.delete_cookie(access_cookie_name, path=ckw.get("path", "/"), domain=ckw.get("domain"), samesite=ckw.get("samesite"))
+        resp.delete_cookie(refresh_cookie_name, path=ckw.get("path", "/"), domain=ckw.get("domain"), samesite=ckw.get("samesite"))
         return resp
 
 
 class CookieTokenRefreshView(TokenRefreshView):
-    # actually inherits from the parent class TokenRefreshView - For learning support only
     permission_classes = [AllowAny]
     throttle_classes = [AnonRateThrottle]
 
     def post(self, request, *args, **kwargs):
-        refresh_token = request.COOKIES.get("refresh_token")
+        refresh_cookie_name = COOKIE_SETTINGS["refresh_cookie_name"]
+        refresh_token = request.COOKIES.get(refresh_cookie_name)
         serializer = self.get_serializer(data={"refresh": refresh_token})
         try:
             serializer.is_valid(raise_exception=True)
@@ -153,9 +173,18 @@ class CookieTokenRefreshView(TokenRefreshView):
 
     def finalize_response(self, request, response, *args, **kwargs):
         data = response.data
+        ckw = {
+            "httponly": COOKIE_SETTINGS["httponly"],
+            "secure": COOKIE_SETTINGS["secure"],
+            "samesite": COOKIE_SETTINGS["samesite"],
+            "domain": COOKIE_SETTINGS["domain"],
+            "path": COOKIE_SETTINGS["path"],
+        }
+        access_cookie_name = COOKIE_SETTINGS["access_cookie_name"]
+        access_max_age = COOKIE_SETTINGS["access_max_age"]
         access = data.get("access")
         if access:
-            response.set_cookie("access_token", access, httponly=True, secure=True, samesite="Lax", max_age=5 * 60)
+            response.set_cookie(access_cookie_name, access, max_age=access_max_age, **ckw)
             del data["access"]
         return super().finalize_response(request, response, *args, **kwargs)
 

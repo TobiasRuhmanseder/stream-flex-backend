@@ -1,4 +1,5 @@
 from django.http import Http404
+import random #needed for the tests
 
 
 def parse_limit(request, default=3, min_value=1, max_value=10):
