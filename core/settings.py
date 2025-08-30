@@ -21,17 +21,15 @@ ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost").split(",")
 CORS_ALLOWED_ORIGINS = ["http://localhost:4200"]
 CORS_ALLOW_CREDENTIALS = True
 
+# CSRF_COOKIE_DOMAIN = ".tobias-domain.de".  //prod Mode !!!! ≈8h to resolve the CSRF problem in prod mode!!! Don't forget this!!!!
 CSRF_COOKIE_NAME = "csrftoken"
 CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SECURE = False  # in prod with https - set true
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", default="http://localhost:4200").split(",")
 
-# Secret Key aus der reCAPTCHA-Admin-UI (Standard v3)
-# später in die env-Datei!!! Nur für Projektabgabe hier
+
+# after the feedback put it into the env-Datei!!! 
 DRF_RECAPTCHA_SECRET_KEY = "6Lf3JH4rAAAAAAZ3L9bm40o_GymkQ7net3q4YfpM"
-
-
-# später Verlagern in env!!!!!!!!!!!!!!!!!!!
 FRONTEND_URL = "http://localhost:4200"
 
 # E-Mail configuration
