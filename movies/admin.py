@@ -25,7 +25,7 @@ class MovieAdmin(admin.ModelAdmin):
     )
 
     def get_queryset(self, request):
-        # FK → select_related statt prefetch_related("genres")
+
         qs = super().get_queryset(request)
         return qs.select_related("genre")
 

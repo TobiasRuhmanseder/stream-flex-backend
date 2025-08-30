@@ -22,7 +22,7 @@ class MovieListCreateView(APIView):
         qs = Movie.objects.filter(processing_status="ready").order_by("-created_at")
         genre_slug = request.query_params.get("genre")
         if genre_slug:
-            qs = qs.filter(genres__slug=genre_slug)
+            qs = qs.filter(genre__slug=genre_slug)
         ser = MovieSerializer(qs, many=True, context={"request": request, "favorite_ids": favorite_ids})
         return Response(ser.data, status=status.HTTP_200_OK)
 
@@ -44,7 +44,7 @@ class SearchMoviesView(generics.ListAPIView):
 
     def get_queryset(self):
         q = (self.request.query_params.get("q") or "").strip()
-        qs = Movie.objects.filter(processing_status="ready").prefetch_related("genres")
+        qs = Movie.objects.filter(processing_status="ready").prefetch_related("genre")
         if q:
             qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
         return qs.order_by("-created_at").distinct()
@@ -87,7 +87,7 @@ class GenreMoviesView(generics.ListAPIView):
 
     def get_queryset(self):
         slug = self.kwargs["slug"]
-        return Movie.objects.filter(genres__slug=slug, processing_status="ready").order_by("-created_at").prefetch_related("genres")
+        return Movie.objects.filter(genre__slug=slug, processing_status="ready").order_by("-created_at").prefetch_related("genre")
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

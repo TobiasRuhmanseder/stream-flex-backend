@@ -67,18 +67,25 @@ class MovieAPITests(APITestCase):
         self.url_list = reverse("t-movie-list")
         self.url_search = reverse("t-movie-search")
         self.url_hero = reverse("t-movie-hero")
-        self.url_genres = reverse("t-genre-list")
+        self.url_genre = reverse("t-genre-list")
 
         # Simple genres
         self.g_action = Genre.objects.create(name="Action", slug="action")
         self.g_drama = Genre.objects.create(name="Drama", slug="drama")
 
-        # Helper to create a "ready" movie
-        self.m1 = Movie.objects.create(title="Alpha", description="first", processing_status="ready", is_hero=False)
-        self.m1.genres.add(self.g_action)
-        self.m2 = Movie.objects.create(title="Bravo", description="second", processing_status="ready", is_hero=True)
-        self.m2.genres.add(self.g_action, self.g_drama)
-        self.m3 = Movie.objects.create(title="Charlie", description="third", processing_status="pending", is_hero=True)  # not ready
+        # Helper to create movies with FK genre (no M2M)
+        # m1: ready, action
+        self.m1 = Movie.objects.create(
+            title="Alpha", description="first", processing_status="ready", is_hero=False, genre=self.g_action
+        )
+        # m2: ready, drama (used by tests expecting ?genre=drama -> only Bravo)
+        self.m2 = Movie.objects.create(
+            title="Bravo", description="second", processing_status="ready", is_hero=True, genre=self.g_drama
+        )
+        # m3: pending (not ready), give it any genre to satisfy FK
+        self.m3 = Movie.objects.create(
+            title="Charlie", description="third", processing_status="pending", is_hero=True, genre=self.g_action
+        )  # not ready
 
     # -----------------------------
     # MovieListCreateView (GET)
@@ -163,7 +170,7 @@ class MovieAPITests(APITestCase):
     # Genre list & movies by genre
     # -----------------------------
     def test_genre_list(self):
-        res = self.client.get(self.url_genres)
+        res = self.client.get(self.url_genre)
         assert res.status_code == status.HTTP_200_OK
         slugs = [g["slug"] for g in res.data]
         assert set(slugs) >= {"action", "drama"}
@@ -173,7 +180,8 @@ class MovieAPITests(APITestCase):
         res = self.client.get(url)
         assert res.status_code == status.HTTP_200_OK
         titles = [m["title"] for m in res.data]
-        assert "Alpha" in titles and "Bravo" in titles and "Charlie" not in titles
+        # With FK genre, only Alpha (action, ready) should be returned
+        assert set(titles) == {"Alpha"}
 
     # -----------------------------
     # ResolveSpeedView

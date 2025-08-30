@@ -111,7 +111,7 @@ class Command(BaseCommand):
                 )
 
                 # One-to-many assignment (exactly one Genre)
-                movie.genres.set([genre])
+                movie.genre.set([genre])
 
                 # Optional: attach the same source MP4
                 if source_file:
