@@ -8,12 +8,16 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
 
   redis:
     image: redis:latest
     container_name: streamflex_redis
     volumes:
       - redis_data:/data
+    networks:
+      - internal
 
   web:
     build:
@@ -21,16 +25,30 @@ services:
       dockerfile: backend.Dockerfile
     env_file: .env
     container_name: streamflex_backend
-
     volumes:
       - .:/app
       - streamflex_media:/app/media
       - streamflex_static:/app/static
-    ports:
-      - "8000:8000"
     depends_on:
       - db
       - redis
+    networks:
+      - internal
+      - proxy
+  caddy:
+    image: caddy:2
+    container_name: streamflex_caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+    networks:
+      - proxy
 
 
 volumes:
@@ -38,3 +56,10 @@ volumes:
   redis_data:
   streamflex_media:
   streamflex_static:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:
+  proxy:
+

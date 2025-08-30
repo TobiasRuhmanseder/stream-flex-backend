@@ -18,19 +18,35 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 DEBUG = True
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost").split(",")
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:4200"]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+CORS_ALLOWED_ORIGINS = ["https://streamflex.tobias-ruhmanseder.de","https://api.streamflex.tobias-ruhmanseder.de"]
 CORS_ALLOW_CREDENTIALS = True
 
+
 # CSRF_COOKIE_DOMAIN = ".tobias-domain.de".  //prod Mode !!!! ≈8h to resolve the CSRF problem in prod mode!!! Don't forget this!!!!
+=======
+CSRF_COOKIE_DOMAIN = ".tobias-ruhmanseder.de"
 CSRF_COOKIE_NAME = "csrftoken"
-CSRF_COOKIE_SAMESITE = "Lax"
-CSRF_COOKIE_SECURE = False  # in prod with https - set true
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", default="http://localhost:4200").split(",")
+CSRF_COOKIE_SAMESITE = "none"
+CSRF_COOKIE_SECURE = True  # in prod with https - set true
+CSRF_TRUSTED_ORIGINS = ["https://streamflex.tobias-ruhmanseder.de","https://api.streamflex.tobias-ruhmanseder.de"]
+# CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", default="http://localhost:4200").split(",")
+
+SESSION_COOKIE_SAMESITE="none"
+SESSION_COOKIE_SECURE=True
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # after the feedback put it into the env-Datei!!! 
 DRF_RECAPTCHA_SECRET_KEY = "6Lf3JH4rAAAAAAZ3L9bm40o_GymkQ7net3q4YfpM"
 FRONTEND_URL = "http://localhost:4200"
+=======
+
+
+# später Verlagern in env!!!!!!!!!!!!!!!!!!!
+FRONTEND_URL = "https://streamflex.tobias-ruhmanseder.de"
 
 # E-Mail configuration
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -166,7 +182,7 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": False,  
     "AUTH_COOKIE": "access_token",          
     "AUTH_REFRESH_COOKIE": "refresh_token",
-    "AUTH_COOKIE_SECURE": False,            # in PROD True (HTTPS)
+    "AUTH_COOKIE_SECURE": True,            # in PROD True (HTTPS)
     "AUTH_COOKIE_SAMESITE": "Lax",
     "AUTH_COOKIE_PATH": "/",
     "AUTH_COOKIE_DOMAIN": None,
@@ -192,4 +208,5 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 

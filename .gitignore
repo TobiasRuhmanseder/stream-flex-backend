@@ -32,7 +32,7 @@ media/
 .env
 *.env
 !.env.template
-
+.venv
 # VS Code spezifische Dateien
 .vscode/
 .code-workspace
@@ -61,3 +61,4 @@ poetry.lock
 # Migrations (optional, falls du sie nicht in Git verfolgen möchtest)
 */migrations/*.py
 !*/migrations/__init__.py
+.venv/
