@@ -140,7 +140,7 @@ class SignInView(TokenObtainPairView):
 
 class SignOutView(APIView):
     """API endpoint to log out a user and delete authentication cookies."""
-    permission_classes = []
+    permission_classes = [AllowAny]
     throttle_classes = [AnonRateThrottle]
 
     def post(self, request):
