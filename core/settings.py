@@ -25,7 +25,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 
 # CSRF_COOKIE_DOMAIN = ".tobias-domain.de".  //prod Mode !!!! ≈8h to resolve the CSRF problem in prod mode!!! Don't forget this!!!!
-=======
+
 CSRF_COOKIE_DOMAIN = ".tobias-ruhmanseder.de"
 CSRF_COOKIE_NAME = "csrftoken"
 CSRF_COOKIE_SAMESITE = "none"
@@ -35,15 +35,11 @@ CSRF_TRUSTED_ORIGINS = ["https://streamflex.tobias-ruhmanseder.de","https://api.
 
 SESSION_COOKIE_SAMESITE="none"
 SESSION_COOKIE_SECURE=True
-
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
 
 # after the feedback put it into the env-Datei!!! 
 DRF_RECAPTCHA_SECRET_KEY = "6Lf3JH4rAAAAAAZ3L9bm40o_GymkQ7net3q4YfpM"
 FRONTEND_URL = "http://localhost:4200"
-=======
-
 
 # später Verlagern in env!!!!!!!!!!!!!!!!!!!
 FRONTEND_URL = "https://streamflex.tobias-ruhmanseder.de"

@@ -1,65 +1,45 @@
 services:
+
   db:
     image: postgres:latest
-    container_name: streamflex_database
+    container_name: videoflix_database
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - internal
 
   redis:
     image: redis:latest
-    container_name: streamflex_redis
+    container_name: videoflix_redis
     volumes:
       - redis_data:/data
-    networks:
-      - internal
 
   web:
     build:
       context: .
       dockerfile: backend.Dockerfile
     env_file: .env
-    container_name: streamflex_backend
+    container_name: videoflix_backend
+
     volumes:
       - .:/app
-      - streamflex_media:/app/media
-      - streamflex_static:/app/static
+      - videoflix_media:/app/media
+      - videoflix_static:/app/static
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
     depends_on:
       - db
       - redis
-    networks:
-      - internal
-      - proxy
-  caddy:
-    image: caddy:2
-    container_name: streamflex_caddy
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - web
-    networks:
-      - proxy
+
+
 
 
 volumes:
   postgres_data:
   redis_data:
-  streamflex_media:
-  streamflex_static:
-  caddy_data:
-  caddy_config:
-
-networks:
-  internal:
-  proxy:
-
+  videoflix_media:
+  videoflix_static:

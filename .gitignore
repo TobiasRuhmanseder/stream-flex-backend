@@ -32,7 +32,7 @@ media/
 .env
 *.env
 !.env.template
-.venv
+.venv/
 # VS Code spezifische Dateien
 .vscode/
 .code-workspace
