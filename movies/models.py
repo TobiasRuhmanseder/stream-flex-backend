@@ -20,18 +20,24 @@ class Genre(models.Model):
 class Movie(models.Model):
     title = models.CharField(max_length=64)
     description = models.TextField(blank=True)
-    genres = models.ManyToManyField(Genre, related_name="movies", blank=True)  # change it to foreignKey
+    genre = models.ForeignKey("movies.Genre",on_delete=models.PROTECT,related_name="movies_fk",null=True, blank=True,)
     logo = models.ImageField(upload_to="movies/logos/", blank=True, null=True)
-    hero_image = models.ImageField(upload_to="movies/hero_images/", blank=True, null=True)
-    thumbnail_image = models.ImageField(upload_to="movies/thumbnails/", blank=True, null=True)
-    teaser_video = models.FileField(upload_to="movies/teasers/", blank=True, null=True)
-    video_file = models.FileField(upload_to="movies/videos/", blank=True, null=True)
-    video_1080 = models.FileField(upload_to="movies/variants/", blank=True, null=True)
-    video_720 = models.FileField(upload_to="movies/variants/", blank=True, null=True)
-    video_480 = models.FileField(upload_to="movies/variants/", blank=True, null=True)
+    hero_image = models.ImageField(
+        upload_to="movies/hero_images/", blank=True, null=True)
+    thumbnail_image = models.ImageField(
+        upload_to="movies/thumbnails/", blank=True, null=True)
+    teaser_video = models.FileField(
+        upload_to="movies/teasers/", blank=True, null=True)
+    video_file = models.FileField(
+        upload_to="movies/videos/", blank=True, null=True)
+    video_1080 = models.FileField(
+        upload_to="movies/variants/", blank=True, null=True)
+    video_720 = models.FileField(
+        upload_to="movies/variants/", blank=True, null=True)
+    video_480 = models.FileField(
+        upload_to="movies/variants/", blank=True, null=True)
     is_hero = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-
 
     PROCESSING_CHOICES = [
         ("pending", "Pending"),
@@ -39,7 +45,8 @@ class Movie(models.Model):
         ("ready", "Ready"),
         ("failed", "Failed"),
     ]
-    processing_status = models.CharField(max_length=12, choices=PROCESSING_CHOICES, default="pending")
+    processing_status = models.CharField(
+        max_length=12, choices=PROCESSING_CHOICES, default="pending")
     processing_error = models.TextField(blank=True, null=True)
     duration_seconds = models.PositiveIntegerField(blank=True, null=True)
 
@@ -48,12 +55,15 @@ class Movie(models.Model):
 
 
 class Favorite(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="favorites")
-    movie = models.ForeignKey("movies.Movie", on_delete=models.CASCADE, related_name="favorited_by")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE, related_name="favorites")
+    movie = models.ForeignKey(
+        "movies.Movie", on_delete=models.CASCADE, related_name="favorited_by")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["user", "movie"], name="uniq_favorite_user_movie")]
+        constraints = [models.UniqueConstraint(
+            fields=["user", "movie"], name="uniq_favorite_user_movie")]
 
     def __str__(self):
         return f"{self.user_id} ♥ {self.movie_id}"

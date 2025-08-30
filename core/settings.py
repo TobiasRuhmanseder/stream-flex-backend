@@ -15,29 +15,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", default=False)
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost").split(",")
-
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
-CORS_ALLOWED_ORIGINS = ["https://streamflex.tobias-ruhmanseder.de","https://api.streamflex.tobias-ruhmanseder.de"]
+CORS_ALLOWED_ORIGINS = ["https://streamflex.tobias-ruhmanseder.de",
+                        "https://api.streamflex.tobias-ruhmanseder.de","http://localhost:8000", "http://localhost:4200",]
 CORS_ALLOW_CREDENTIALS = True
 
 
 # CSRF_COOKIE_DOMAIN = ".tobias-domain.de".  //prod Mode !!!! ≈8h to resolve the CSRF problem in prod mode!!! Don't forget this!!!!
-
-CSRF_COOKIE_DOMAIN = ".tobias-ruhmanseder.de"
 CSRF_COOKIE_NAME = "csrftoken"
-CSRF_COOKIE_SAMESITE = "none"
-CSRF_COOKIE_SECURE = True  # in prod with https - set true
-CSRF_TRUSTED_ORIGINS = ["https://streamflex.tobias-ruhmanseder.de","https://api.streamflex.tobias-ruhmanseder.de"]
+CSRF_COOKIE_SAMESITE = "lax"
+CSRF_COOKIE_SECURE = False  # in prod with https - set true
+CSRF_TRUSTED_ORIGINS = ["https://streamflex.tobias-ruhmanseder.de",
+                        "https://api.streamflex.tobias-ruhmanseder.de", "http://localhost:8000", "http://localhost:4200",]
 # CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", default="http://localhost:4200").split(",")
 
-SESSION_COOKIE_SAMESITE="none"
-SESSION_COOKIE_SECURE=True
+SESSION_COOKIE_SAMESITE = "lax"
+SESSION_COOKIE_SECURE = False
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# after the feedback put it into the env-Datei!!! 
+# after the feedback put it into the env-Datei!!!
 DRF_RECAPTCHA_SECRET_KEY = "6Lf3JH4rAAAAAAZ3L9bm40o_GymkQ7net3q4YfpM"
 FRONTEND_URL = "http://localhost:4200"
 
@@ -50,8 +48,10 @@ EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False").lower() in ("true", "1", "yes")
-EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "False").lower() in ("true", "1", "yes")
+EMAIL_USE_TLS = os.environ.get(
+    "EMAIL_USE_TLS", "False").lower() in ("true", "1", "yes")
+EMAIL_USE_SSL = os.environ.get(
+    "EMAIL_USE_SSL", "False").lower() in ("true", "1", "yes")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 
 
@@ -76,13 +76,13 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ("users.jwt_cookie_auth.CustomAuthentication",),
     # 1. global active throttling
     "DEFAULT_THROTTLE_CLASSES": [
-        "rest_framework.throttling.AnonRateThrottle", 
-        "rest_framework.throttling.UserRateThrottle",  
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
     ],
     # 2. rate-limit per classes
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "30/minute",  
-        "user": "150/minute",  
+        "anon": "30/minute",
+        "user": "150/minute",
     },
 }
 
@@ -172,11 +172,11 @@ AUTH_USER_MODEL = "users.User"
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),  
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),  
-    "ROTATE_REFRESH_TOKENS": False, 
-    "BLACKLIST_AFTER_ROTATION": False,  
-    "AUTH_COOKIE": "access_token",          
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
+    "AUTH_COOKIE": "access_token",
     "AUTH_REFRESH_COOKIE": "refresh_token",
     "AUTH_COOKIE_SECURE": True,            # in PROD True (HTTPS)
     "AUTH_COOKIE_SAMESITE": "Lax",
@@ -204,5 +204,3 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-
