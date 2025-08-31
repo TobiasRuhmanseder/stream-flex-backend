@@ -8,7 +8,6 @@ READONLY_ASSETS = ("teaser_video", "thumbnail_image",
 
 @admin.register(Movie)
 class MovieAdmin(admin.ModelAdmin):
-    # FK: wir können das Genre direkt anzeigen
     list_display = ("id", "title", "genre_display", "is_hero", "created_at")
     list_filter = ("is_hero", "created_at")
     search_fields = ("title", "description")
@@ -16,11 +15,11 @@ class MovieAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            "fields": ("title", "description", "genre", "is_hero"),
+            "fields": ("title", "description", "video_file","genre", "is_hero"),
         }),
-        ("Assets (vom RQ-Worker gefüllt)", {
+        ("Assets (from RQ-Worker filde)", {
             "fields": READONLY_ASSETS,
-            "description": "Diese Felder sind schreibgeschützt und werden asynchron generiert.",
+            "description": "These fields are read-only and are generated asynchronously. ",
         }),
     )
 
@@ -41,10 +40,7 @@ class GenreAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        # neues related_name aus deinem FK (oder "movie_set", falls du keines gesetzt hast)
         return qs.annotate(_movie_count=Count("movies_fk", distinct=True))
-        # falls du KEIN related_name vergeben hast, nimm:
-        # return qs.annotate(_movie_count=Count("movie", distinct=True))
 
     @admin.display(description="Movies")
     def movie_count(self, obj):
