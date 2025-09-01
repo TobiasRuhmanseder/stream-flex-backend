@@ -67,6 +67,7 @@ class CheckEmailView(generics.GenericAPIView):
 class VerifyEmailView(APIView):
     """API endpoint to verify a user's email address using a token."""
     permission_classes = [AllowAny]
+    authentication_classes = []
     throttle_classes = [AnonRateThrottle]
 
     def get(self, request, *args, **kwargs):

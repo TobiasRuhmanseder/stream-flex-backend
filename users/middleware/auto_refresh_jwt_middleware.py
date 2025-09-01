@@ -12,8 +12,9 @@ DEFAULT_EXEMPT_PREFIXES = (
     "/favicon.ico",
     "/api/users/login",
     "/api/users/logout",
-    "/api/users/refresh",  # falls du den Endpoint parallel behältst
-    "/api/users/csrf",     # wird hier nicht benutzt, aber vom Refresh ausgenommen
+    "/api/users/refresh",
+    "/api/users/verify-email/" 
+    "/api/users/csrf",   
 )
 
 
