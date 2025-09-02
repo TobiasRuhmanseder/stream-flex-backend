@@ -18,7 +18,7 @@ class Genre(models.Model):
 
 
 class Movie(models.Model):
-    title = models.CharField(max_length=64)
+    title = models.CharField(max_length=64, unique=True)
     description = models.TextField(blank=True)
     genre = models.ForeignKey("movies.Genre",on_delete=models.PROTECT,related_name="movies_fk",null=True, blank=True,)
     logo = models.ImageField(upload_to="movies/logos/", blank=True, null=True)
@@ -29,7 +29,7 @@ class Movie(models.Model):
     teaser_video = models.FileField(
         upload_to="movies/teasers/", blank=True, null=True)
     video_file = models.FileField(
-        upload_to="movies/videos/", blank=True, null=True)
+        upload_to="movies/videos/", blank=True, null=True, unique=True)
     video_1080 = models.FileField(
         upload_to="movies/variants/", blank=True, null=True)
     video_720 = models.FileField(

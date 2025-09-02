@@ -19,7 +19,7 @@ DEBUG = os.environ.get("DEBUG", default=False)
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", default="localhost").split(",")
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 CORS_ALLOWED_ORIGINS = ["https://streamflex.tobias-ruhmanseder.de",
-                        "https://api.streamflex.tobias-ruhmanseder.de","http://localhost:8000", "http://localhost:4200",]
+                        "https://api.streamflex.tobias-ruhmanseder.de", "http://localhost:8000", "http://localhost:4200",]
 CORS_ALLOW_CREDENTIALS = True
 
 
@@ -204,3 +204,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+FILE_UPLOAD_HANDLERS = [
+    "django.core.files.uploadhandler.TemporaryFileUploadHandler",
+]
